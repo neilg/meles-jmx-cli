@@ -32,4 +32,11 @@
 
     <artifactId>meles-utils-jmx</artifactId>
 
+    <dependencies>
+        <dependency>
+            <groupId>net.sf.jopt-simple</groupId>
+            <artifactId>jopt-simple</artifactId>
+        </dependency>
+    </dependencies>
+
 </project>
