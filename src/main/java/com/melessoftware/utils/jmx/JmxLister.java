@@ -43,7 +43,8 @@ public class JmxLister {
     public static void main(String[] args) throws IOException {
 
         OptionParser parser = new OptionParser();
-        OptionSpec<String> urlOptionSpec = parser.accepts("u", "JMX service url").withRequiredArg().required();
+        OptionSpec<String> urlSpec = parser.accepts("u", "JMX service url").withRequiredArg().required();
+        OptionSpec<String> objectNameSpec = parser.accepts("n", "ObjectName pattern").withRequiredArg().defaultsTo("*:*");
 
         OptionSet options = null;
         try {
@@ -54,7 +55,8 @@ public class JmxLister {
             System.exit(EXIT_STATUS_INVALID_ARGS);
         }
 
-        String url = options.valueOf(urlOptionSpec);
+        String url = options.valueOf(urlSpec);
+        String objectNamePattern = options.valueOf(objectNameSpec);
         JmxLister lister = null;
         try {
             lister = new JmxLister(url);
@@ -68,7 +70,7 @@ public class JmxLister {
             System.exit(EXIT_STATUS_INVALID_ARGS);
         }
         try {
-            lister.list(System.out);
+            lister.list(objectNamePattern, System.out);
         } catch (MalformedURLException mue) {
             String message = mue.getMessage();
             if (message == null) {
@@ -85,6 +87,14 @@ public class JmxLister {
                 System.err.printf("Failure communicating with %s: %s%n", url, message);
             }
             System.exit(EXIT_STATUS_COMMUNICATION);
+        } catch (MalformedObjectNameException mone) {
+            String message = mone.getMessage();
+            if(message==null) {
+                System.err.printf("Invalid ObjectName pattern: %s%n", objectNamePattern);
+            } else {
+                System.err.printf("Invalid ObjectName pattern: %s, %s%n", objectNamePattern, message);
+            }
+            System.exit(EXIT_STATUS_INVALID_ARGS);
         }
     }
 
@@ -98,15 +108,15 @@ public class JmxLister {
         this.url = url;
     }
 
-    public void list(Appendable out) throws IOException {
+    public void list(String objectNamePattern, Appendable out) throws IOException, MalformedObjectNameException {
         JMXConnector connector = JMXConnectorFactory.connect(url);
-        MBeanServerConnection connection = connector.getMBeanServerConnection();
         try {
-            for (ObjectInstance objectInstance : connection.queryMBeans(new ObjectName("*:*"), null)) {
+            MBeanServerConnection connection = connector.getMBeanServerConnection();
+            for (ObjectInstance objectInstance : connection.queryMBeans(new ObjectName(objectNamePattern), null)) {
                 System.out.println(objectInstance.getObjectName());
             }
-        } catch (MalformedObjectNameException mone) {
-
+        } finally {
+            connector.close();
         }
     }
 
