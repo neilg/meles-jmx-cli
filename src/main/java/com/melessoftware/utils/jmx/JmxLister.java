@@ -24,12 +24,8 @@ import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 
-import javax.management.MBeanServerConnection;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectInstance;
-import javax.management.ObjectName;
-import javax.management.remote.JMXConnector;
-import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -37,7 +33,6 @@ import java.net.MalformedURLException;
 public class JmxLister {
 
     private static final int EXIT_STATUS_INVALID_ARGS = -1;
-
     private static final int EXIT_STATUS_COMMUNICATION = 1;
 
     public static void main(String[] args) throws IOException {
@@ -89,7 +84,7 @@ public class JmxLister {
             System.exit(EXIT_STATUS_COMMUNICATION);
         } catch (MalformedObjectNameException mone) {
             String message = mone.getMessage();
-            if(message==null) {
+            if (message == null) {
                 System.err.printf("Invalid ObjectName pattern: %s%n", objectNamePattern);
             } else {
                 System.err.printf("Invalid ObjectName pattern: %s, %s%n", objectNamePattern, message);
@@ -109,15 +104,11 @@ public class JmxLister {
     }
 
     public void list(String objectNamePattern, Appendable out) throws IOException, MalformedObjectNameException {
-        JMXConnector connector = JMXConnectorFactory.connect(url);
-        try {
-            MBeanServerConnection connection = connector.getMBeanServerConnection();
-            for (ObjectInstance objectInstance : connection.queryMBeans(new ObjectName(objectNamePattern), null)) {
-                System.out.println(objectInstance.getObjectName());
-            }
-        } finally {
-            connector.close();
+        Client client = new Client(url);
+        for (ObjectInstance objectInstance : client.objects(objectNamePattern)) {
+            System.out.println(objectInstance.getObjectName());
         }
+        client.disconnect();
     }
 
 }
