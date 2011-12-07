@@ -89,12 +89,22 @@ public class Client {
     }
 
     public Object readAttribute(ObjectName objectName, String attributeName) throws IOException, InstanceNotFoundException, ReflectionException, AttributeNotFoundException, MBeanException {
-        return connection().getAttribute(objectName, attributeName);
+        try {
+            return connection().getAttribute(objectName, attributeName);
+        } catch (IOException ioe) {
+            disconnect();
+            throw ioe;
+        }
     }
 
     public void writeAttribute(ObjectName objectName, String attributeName, Object attributeValue) throws IOException, InstanceNotFoundException, InvalidAttributeValueException, ReflectionException, AttributeNotFoundException, MBeanException {
         Attribute attribute = new Attribute(attributeName, attributeValue);
-        connection().setAttribute(objectName, attribute);
+        try {
+            connection().setAttribute(objectName, attribute);
+        } catch (IOException ioe) {
+            disconnect();
+            throw ioe;
+        }
     }
 
     private MBeanServerConnection connection() throws IOException {
