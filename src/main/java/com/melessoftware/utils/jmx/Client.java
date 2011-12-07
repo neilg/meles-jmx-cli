@@ -51,17 +51,6 @@ public class Client {
         this.serviceUrl = serviceUrl;
     }
 
-    public String[] domains() throws IOException {
-        connectIfNeeded();
-        try {
-            MBeanServerConnection connection = connector.getMBeanServerConnection();
-            return connection.getDomains();
-        } catch (IOException ioe) {
-            disconnect();
-            throw ioe;
-        }
-    }
-
     public void disconnect() throws IOException {
         if (connector != null) {
             try {
@@ -69,6 +58,15 @@ public class Client {
             } finally {
                 connector = null;
             }
+        }
+    }
+
+    public String[] domains() throws IOException {
+        try {
+            return connection().getDomains();
+        } catch (IOException ioe) {
+            disconnect();
+            throw ioe;
         }
     }
 
@@ -90,17 +88,6 @@ public class Client {
         }
     }
 
-    private MBeanServerConnection connection() throws IOException {
-        connectIfNeeded();
-        return connector.getMBeanServerConnection();
-    }
-
-    private void connectIfNeeded() throws IOException {
-        if (connector == null) {
-            connector = JMXConnectorFactory.connect(serviceUrl);
-        }
-    }
-
     public Object readAttribute(ObjectName objectName, String attributeName) throws IOException, InstanceNotFoundException, ReflectionException, AttributeNotFoundException, MBeanException {
         return connection().getAttribute(objectName, attributeName);
     }
@@ -108,5 +95,12 @@ public class Client {
     public void writeAttribute(ObjectName objectName, String attributeName, Object attributeValue) throws IOException, InstanceNotFoundException, InvalidAttributeValueException, ReflectionException, AttributeNotFoundException, MBeanException {
         Attribute attribute = new Attribute(attributeName, attributeValue);
         connection().setAttribute(objectName, attribute);
+    }
+
+    private MBeanServerConnection connection() throws IOException {
+        if (connector == null) {
+            connector = JMXConnectorFactory.connect(serviceUrl);
+        }
+        return connector.getMBeanServerConnection();
     }
 }
