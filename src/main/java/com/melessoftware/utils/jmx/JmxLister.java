@@ -56,24 +56,12 @@ public class JmxLister {
         try {
             lister = new JmxLister(url);
         } catch (MalformedURLException mue) {
-            String message = mue.getMessage();
-            if (message == null) {
-                System.err.printf("Invalid JMX URL: %s%n", url);
-            } else {
-                System.err.printf("Invalid JMX URL: %s, %s%n", url, message);
-            }
-            System.exit(EXIT_STATUS_INVALID_ARGS);
+            exitMalformedUrl(url, mue);
         }
         try {
             lister.list(objectNamePattern, System.out);
         } catch (MalformedURLException mue) {
-            String message = mue.getMessage();
-            if (message == null) {
-                System.err.printf("Invalid JMX URL: %s%n", url);
-            } else {
-                System.err.printf("Invalid JMX URL: %s, %s%n", url, message);
-            }
-            System.exit(EXIT_STATUS_INVALID_ARGS);
+            exitMalformedUrl(url, mue);
         } catch (IOException e) {
             String message = e.getMessage();
             if (message == null) {
@@ -91,6 +79,16 @@ public class JmxLister {
             }
             System.exit(EXIT_STATUS_INVALID_ARGS);
         }
+    }
+
+    private static void exitMalformedUrl(String url, MalformedURLException mue) {
+        String message = mue.getMessage();
+        if (message == null) {
+            System.err.printf("Invalid JMX URL: %s%n", url);
+        } else {
+            System.err.printf("Invalid JMX URL: %s, %s%n", url, message);
+        }
+        System.exit(EXIT_STATUS_INVALID_ARGS);
     }
 
     private JMXServiceURL url;
