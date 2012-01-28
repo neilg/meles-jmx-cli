@@ -23,6 +23,8 @@ import joptsimple.OptionException;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.management.MalformedObjectNameException;
 import java.io.IOException;
@@ -33,6 +35,8 @@ import java.util.concurrent.TimeUnit;
 public class JmxLogger {
 
     private static final int EXIT_STATUS_INVALID_ARGS = -1;
+
+    private static final Logger LOG = LoggerFactory.getLogger(JmxLogger.class);
 
     public static void main(String[] args) throws IOException {
         OptionParser parser = new OptionParser();
@@ -69,7 +73,8 @@ public class JmxLogger {
             public void run() {
                 try {
                     client.execute(command);
-                } catch (IOException e) {
+                } catch (IOException ioe) {
+                    LOG.debug("exception executing query", ioe);
                 }
             }
         }, 0, 1000, TimeUnit.MILLISECONDS);
@@ -85,6 +90,7 @@ public class JmxLogger {
                         client.disconnect();
                     } catch (IOException ioe) {
                         // we're shutting down anyway. Don't worry about it
+                        LOG.trace("exception disconnecting client", ioe);
                     }
                 }
             }
@@ -92,9 +98,9 @@ public class JmxLogger {
     }
 
     private static Client createClient(String url) {
-        Client maybeClient;
+        Client client;
         try {
-            maybeClient = new Client(url);
+            client = new Client(url);
         } catch (MalformedURLException mue) {
             String message = mue.getMessage();
             if (message == null) {
@@ -105,6 +111,6 @@ public class JmxLogger {
             System.exit(EXIT_STATUS_INVALID_ARGS);
             return null;
         }
-        return maybeClient;
+        return client;
     }
 }
