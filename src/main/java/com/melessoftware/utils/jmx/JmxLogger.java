@@ -53,33 +53,9 @@ public class JmxLogger {
         final String objectName = options.valueOf(objectNameSpec);
         final String attributeName = options.valueOf(attributeNameSpec);
 
-        Client maybeClient;
-        try {
-            maybeClient = new Client(url);
-        } catch (MalformedURLException mue) {
-            String message = mue.getMessage();
-            if (message == null) {
-                System.err.printf("Invalid JMX URL: %s%n", url);
-            } else {
-                System.err.printf("Invalid JMX URL: %s, %s%n", url, message);
-            }
-            System.exit(EXIT_STATUS_INVALID_ARGS);
-            return;
-        }
-        final Client client = maybeClient;
+        final Client client = createClient(url);
 
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            @Override
-            public void run() {
-                if (client != null) {
-                    try {
-                        client.disconnect();
-                    } catch (IOException ioe) {
-                        // we're shutting down anyway. Don't worry about it
-                    }
-                }
-            }
-        });
+        closeClientOnShutdown(client);
 
         final LogAttributeCommand command;
         try {
@@ -98,5 +74,37 @@ public class JmxLogger {
             }
         }, 0, 1000, TimeUnit.MILLISECONDS);
 
+    }
+
+    private static void closeClientOnShutdown(final Client client) {
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            @Override
+            public void run() {
+                if (client != null) {
+                    try {
+                        client.disconnect();
+                    } catch (IOException ioe) {
+                        // we're shutting down anyway. Don't worry about it
+                    }
+                }
+            }
+        });
+    }
+
+    private static Client createClient(String url) {
+        Client maybeClient;
+        try {
+            maybeClient = new Client(url);
+        } catch (MalformedURLException mue) {
+            String message = mue.getMessage();
+            if (message == null) {
+                System.err.printf("Invalid JMX URL: %s%n", url);
+            } else {
+                System.err.printf("Invalid JMX URL: %s, %s%n", url, message);
+            }
+            System.exit(EXIT_STATUS_INVALID_ARGS);
+            return null;
+        }
+        return maybeClient;
     }
 }
