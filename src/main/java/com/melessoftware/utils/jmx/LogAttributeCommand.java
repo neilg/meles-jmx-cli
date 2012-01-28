@@ -19,6 +19,9 @@
 
 package com.melessoftware.utils.jmx;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.management.AttributeNotFoundException;
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanException;
@@ -28,48 +31,50 @@ import javax.management.ObjectInstance;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 
-public class QueryAttributeCommand implements Command<List<QueryAttributeResult>> {
+public class LogAttributeCommand implements Command<Void> {
+
+    public static final String LOG_PATTERN = "{} {} {}";
 
     private ObjectName objectNamePattern;
     private String attributeName;
+    private Logger logger;
 
-    public QueryAttributeCommand(ObjectName objectNamePattern, String attributeName) {
-        this.objectNamePattern = objectNamePattern;
-        this.attributeName = attributeName;
+    public LogAttributeCommand(String objectNamePattern, String attributeName, String logger) throws MalformedObjectNameException {
+        this(new ObjectName(objectNamePattern), attributeName, LoggerFactory.getLogger(logger));
     }
 
-    public QueryAttributeCommand(String objectNamePattern, String attributeName) throws MalformedObjectNameException {
-        this(new ObjectName(objectNamePattern), attributeName);
+    public LogAttributeCommand(ObjectName objectNamePattern, String attributeName, Logger logger) {
+        this.objectNamePattern = objectNamePattern;
+        this.attributeName = attributeName;
+        this.logger = logger;
     }
 
     @Override
-    public List<QueryAttributeResult> execute(MBeanServerConnection connection) throws IOException {
+    public Void execute(MBeanServerConnection connection) throws IOException {
         Set<ObjectInstance> objects = connection.queryMBeans(objectNamePattern, null);
-        List<QueryAttributeResult> results = new ArrayList<QueryAttributeResult>(objects.size());
         for (ObjectInstance object : objects) {
             ObjectName objectName = object.getObjectName();
             try {
                 Object attributeValue = connection.getAttribute(objectName, attributeName);
-                results.add(new AttributeValueResult(objectName, attributeName, attributeValue));
+                logger.info(LOG_PATTERN, new Object[]{objectName, attributeName, attributeValue});
             } catch (MBeanException e) {
                 // wraps exception thrown by mbean's getter
-                results.add(new FailedQueryResult(objectName, attributeName, e));
+                logger.error("{} MBean threw Exception executing getter for {} {}", new Object[]{objectName, attributeName, e.getTargetException()});
             } catch (AttributeNotFoundException e) {
                 // attribute not accessible in mbean
-                results.add(new FailedQueryResult(objectName, attributeName, e));
+                logger.error("attribute {} was not accessible in {} MBean", attributeName, objectName);
             } catch (InstanceNotFoundException e) {
                 // mbean doesn't exist on server
                 // There is a small race window for this to happen, but it's quite unlikely. The server has just told us that the object exists.
-                results.add(new FailedQueryResult(objectName, attributeName, e));
+                logger.debug("MBean {} disappeared", objectName);
             } catch (ReflectionException e) {
                 // wraps Exception thrown when trying to invoke getter (javadoc for connection.getAttribute says "invoke setter"???)
-                results.add(new FailedQueryResult(objectName, attributeName, e));
+                logger.error("{} MBean threw Exception executing getter for {} {}", new Object[]{objectName, attributeName, e.getTargetException()});
             }
         }
-        return results;
+
+        return null;
     }
 }

@@ -25,12 +25,9 @@ import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 
 import javax.management.MalformedObjectNameException;
-import javax.management.ObjectInstance;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.util.Set;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class JmxLogger {
@@ -84,35 +81,22 @@ public class JmxLogger {
             }
         });
 
-        ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
-
+        final LogAttributeCommand command;
         try {
-            Set<ObjectInstance> objects = client.objects(objectName);
-            for (ObjectInstance object : objects) {
-                System.out.println(client.readAttribute(object.getObjectName(), attributeName));
-            }
-        } catch (MalformedObjectNameException mone) {
-            throw new RuntimeException("TODO");
-        } catch (Exception e) {
-            throw new RuntimeException("TODO");
+            command = new LogAttributeCommand(objectName, attributeName, "JmxLogger");
+        } catch (MalformedObjectNameException e) {
+            throw new RuntimeException("TODO", e);
         }
 
-        executorService.scheduleAtFixedRate(new Runnable() {
+        Executors.newScheduledThreadPool(1).scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
-                Set<ObjectInstance> objects = null;
                 try {
-                    objects = client.objects(objectName);
-                    for (ObjectInstance object : objects) {
-                        System.out.println(client.readAttribute(object.getObjectName(), attributeName));
-                    }
-                } catch (MalformedObjectNameException e) {
-                    e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-                } catch (Exception e) {
-                    e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                    client.execute(command);
+                } catch (IOException e) {
                 }
             }
-        }, 1000, 1000, TimeUnit.MILLISECONDS);
+        }, 0, 1000, TimeUnit.MILLISECONDS);
 
     }
 }
