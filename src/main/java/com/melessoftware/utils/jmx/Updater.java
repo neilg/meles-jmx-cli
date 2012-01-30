@@ -33,6 +33,7 @@ import javax.management.ObjectInstance;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
 import java.io.BufferedReader;
+import java.io.Console;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
@@ -97,15 +98,20 @@ public class Updater {
         outputProposedUpdates(proposedUpdatesByUrl);
 
         System.out.println();
-        System.out.printf("Update %s (with current values as above) to %s  ? (y/N)%n", updateAttributeName, updateAttributeValue);
-        System.out.flush();
-        String response = new BufferedReader(new InputStreamReader(System.in)).readLine();
+
+        Console console = System.console();
+        String response = console.readLine("Update %s (with current values as above) to %s  ? (y/N)%n", updateAttributeName, updateAttributeValue);
 
         if (!response.equalsIgnoreCase("y")) {
             System.out.println("Terminating at user request");
             System.exit(0);
         }
 
+        performUpdates(updateAttributeName, updateAttributeValue, clients, proposedUpdatesByUrl);
+
+    }
+
+    private static void performUpdates(String updateAttributeName, String updateAttributeValue, Map<String, Client> clients, Map<String, List<UpdateInfo>> proposedUpdatesByUrl) throws IOException, InstanceNotFoundException, InvalidAttributeValueException, ReflectionException, AttributeNotFoundException, MBeanException {
         for (String url : proposedUpdatesByUrl.keySet()) {
             Client client = clients.get(url);
             System.out.println(url);
@@ -123,7 +129,6 @@ public class Updater {
             }
             System.out.println();
         }
-
     }
 
     private static void outputProposedUpdates(Map<String, List<UpdateInfo>> proposedUpdatesByUrl) {
