@@ -94,13 +94,7 @@ public class Updater {
 
         Map<String, List<UpdateInfo>> proposedUpdatesByUrl = calculateProposedUpdates(urls, objectNamePattern, updateAttributeName, filterAttributeName, filterAttributeValue, clients);
 
-        for (String url : proposedUpdatesByUrl.keySet()) {
-            System.out.println();
-            System.out.println(url);
-            for (UpdateInfo updateInfo : proposedUpdatesByUrl.get(url)) {
-                System.out.printf("\t%s\t %s%n", updateInfo.updateObjectId(), updateInfo.currentUpdateAttributeValue);
-            }
-        }
+        outputProposedUpdates(proposedUpdatesByUrl);
 
         System.out.println();
         System.out.printf("Update %s (with current values as above) to %s  ? (y/N)%n", updateAttributeName, updateAttributeValue);
@@ -130,6 +124,16 @@ public class Updater {
             System.out.println();
         }
 
+    }
+
+    private static void outputProposedUpdates(Map<String, List<UpdateInfo>> proposedUpdatesByUrl) {
+        for (String url : proposedUpdatesByUrl.keySet()) {
+            System.out.println();
+            System.out.println(url);
+            for (UpdateInfo updateInfo : proposedUpdatesByUrl.get(url)) {
+                System.out.printf("\t%s\t %s%n", updateInfo.updateObjectId(), updateInfo.currentUpdateAttributeValue);
+            }
+        }
     }
 
     private static Map<String, List<UpdateInfo>> calculateProposedUpdates(List<String> urls, String objectNamePattern, String updateAttributeName, String filterAttributeName, String filterAttributeValue, Map<String, Client> clients) throws MalformedObjectNameException, IOException, InstanceNotFoundException, ReflectionException, AttributeNotFoundException, MBeanException {
