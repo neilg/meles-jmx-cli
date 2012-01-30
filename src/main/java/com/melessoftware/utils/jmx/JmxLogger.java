@@ -64,8 +64,15 @@ public class JmxLogger {
         final LogAttributeCommand command;
         try {
             command = new LogAttributeCommand(objectName, attributeName, "JmxLogger");
-        } catch (MalformedObjectNameException e) {
-            throw new RuntimeException("TODO", e);
+        } catch (MalformedObjectNameException mone) {
+            String message = mone.getMessage();
+            if (message == null) {
+                System.err.printf("Invalid object name: %s%n", objectName);
+            } else {
+                System.err.printf("Invalid object name: %s, %s%n", objectName, message);
+            }
+            System.exit(EXIT_STATUS_INVALID_ARGS);
+            return;
         }
 
         Executors.newScheduledThreadPool(1).scheduleAtFixedRate(logAttributeTask(client, command), 0, 1000, TimeUnit.MILLISECONDS);
