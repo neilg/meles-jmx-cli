@@ -92,23 +92,7 @@ public class Updater {
 
         Map<String, Client> clients = createClients(urls);
 
-        Map<String, List<UpdateInfo>> proposedUpdatesByUrl = new HashMap<String, List<UpdateInfo>>();
-
-        for (String url : urls) {
-            Client client = clients.get(url);
-            proposedUpdatesByUrl.put(url, new ArrayList<UpdateInfo>());
-            Set<ObjectInstance> objectInstances = (filterAttributeName == null) ? client.objects(objectNamePattern) : client.objects(objectNamePattern, filterAttributeName, filterAttributeValue);
-            for (ObjectInstance objectInstance : objectInstances) {
-                UpdateInfo updateInfo = new UpdateInfo();
-                updateInfo.objectName = objectInstance.getObjectName();
-                updateInfo.currentUpdateAttributeValue = client.readAttribute(updateInfo.objectName, updateAttributeName);
-                if (filterAttributeName != null) {
-                    updateInfo.filterAttributeName = filterAttributeName;
-                    updateInfo.discoveredFilterAttributeValue = client.readAttribute(updateInfo.objectName, filterAttributeName);
-                }
-                proposedUpdatesByUrl.get(url).add(updateInfo);
-            }
-        }
+        Map<String, List<UpdateInfo>> proposedUpdatesByUrl = calculateProposedUpdates(urls, objectNamePattern, updateAttributeName, filterAttributeName, filterAttributeValue, clients);
 
         for (String url : proposedUpdatesByUrl.keySet()) {
             System.out.println();
@@ -146,6 +130,27 @@ public class Updater {
             System.out.println();
         }
 
+    }
+
+    private static Map<String, List<UpdateInfo>> calculateProposedUpdates(List<String> urls, String objectNamePattern, String updateAttributeName, String filterAttributeName, String filterAttributeValue, Map<String, Client> clients) throws MalformedObjectNameException, IOException, InstanceNotFoundException, ReflectionException, AttributeNotFoundException, MBeanException {
+        Map<String, List<UpdateInfo>> proposedUpdatesByUrl = new HashMap<String, List<UpdateInfo>>();
+
+        for (String url : urls) {
+            Client client = clients.get(url);
+            proposedUpdatesByUrl.put(url, new ArrayList<UpdateInfo>());
+            Set<ObjectInstance> objectInstances = (filterAttributeName == null) ? client.objects(objectNamePattern) : client.objects(objectNamePattern, filterAttributeName, filterAttributeValue);
+            for (ObjectInstance objectInstance : objectInstances) {
+                UpdateInfo updateInfo = new UpdateInfo();
+                updateInfo.objectName = objectInstance.getObjectName();
+                updateInfo.currentUpdateAttributeValue = client.readAttribute(updateInfo.objectName, updateAttributeName);
+                if (filterAttributeName != null) {
+                    updateInfo.filterAttributeName = filterAttributeName;
+                    updateInfo.discoveredFilterAttributeValue = client.readAttribute(updateInfo.objectName, filterAttributeName);
+                }
+                proposedUpdatesByUrl.get(url).add(updateInfo);
+            }
+        }
+        return proposedUpdatesByUrl;
     }
 
     private static Map<String, Client> createClients(List<String> urls) throws MalformedURLException {
