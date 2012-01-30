@@ -68,7 +68,11 @@ public class JmxLogger {
             throw new RuntimeException("TODO", e);
         }
 
-        Executors.newScheduledThreadPool(1).scheduleAtFixedRate(new Runnable() {
+        Executors.newScheduledThreadPool(1).scheduleAtFixedRate(logAttributeTask(client, command), 0, 1000, TimeUnit.MILLISECONDS);
+    }
+
+    private static Runnable logAttributeTask(final Client client, final LogAttributeCommand command) {
+        return new Runnable() {
             @Override
             public void run() {
                 try {
@@ -77,8 +81,7 @@ public class JmxLogger {
                     LOG.debug("exception executing query", ioe);
                 }
             }
-        }, 0, 1000, TimeUnit.MILLISECONDS);
-
+        };
     }
 
     private static void closeClientOnShutdown(final Client client) {
