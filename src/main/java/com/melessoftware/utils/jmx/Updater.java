@@ -35,6 +35,7 @@ import javax.management.ReflectionException;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -89,21 +90,7 @@ public class Updater {
             filterAttributeValue = attributeFilterParts[1];
         }
 
-        Map<String, Client> clients = new HashMap<String, Client>();
-        for (String url : urls) {
-            final Client client = new Client(url);
-            Runtime.getRuntime().addShutdownHook(new Thread() {
-                @Override
-                public void run() {
-                    try {
-                        client.disconnect();
-                    } catch (IOException ioe) {
-                        // ignore it, we're shutting down
-                    }
-                }
-            });
-            clients.put(url, client);
-        }
+        Map<String, Client> clients = createClients(urls);
 
         class UpdateInfo {
             ObjectName objectName;
@@ -162,7 +149,7 @@ public class Updater {
             for (UpdateInfo updateInfo : proposedUpdatesByUrl.get(url)) {
                 client.writeAttribute(updateInfo.objectName, updateAttributeName, updateAttributeValue);
                 Object updatedAttributeValue = client.readAttribute(updateInfo.objectName, updateAttributeName);
-                if(updateAttributeValue.equals(updatedAttributeValue)) {
+                if (updateAttributeValue.equals(updatedAttributeValue)) {
                     // it's as expected
                     System.out.printf("\t%s\t %s%n", updateInfo.updateObjectId(), updatedAttributeValue);
                 } else {
@@ -174,6 +161,25 @@ public class Updater {
             System.out.println();
         }
 
+    }
+
+    private static Map<String, Client> createClients(List<String> urls) throws MalformedURLException {
+        Map<String, Client> clients = new HashMap<String, Client>();
+        for (String url : urls) {
+            final Client client = new Client(url);
+            Runtime.getRuntime().addShutdownHook(new Thread() {
+                @Override
+                public void run() {
+                    try {
+                        client.disconnect();
+                    } catch (IOException ioe) {
+                        // ignore it, we're shutting down
+                    }
+                }
+            });
+            clients.put(url, client);
+        }
+        return clients;
     }
 
 }
