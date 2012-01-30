@@ -92,21 +92,6 @@ public class Updater {
 
         Map<String, Client> clients = createClients(urls);
 
-        class UpdateInfo {
-            ObjectName objectName;
-            String filterAttributeName;
-            Object discoveredFilterAttributeValue;
-            Object currentUpdateAttributeValue;
-
-            public String updateObjectId() {
-                if (filterAttributeName == null) {
-                    return String.format("%s", objectName);
-                } else {
-                    return String.format("%s (%s=%s)", objectName, filterAttributeName, discoveredFilterAttributeValue);
-                }
-            }
-        }
-
         Map<String, List<UpdateInfo>> proposedUpdatesByUrl = new HashMap<String, List<UpdateInfo>>();
 
         for (String url : urls) {
@@ -180,6 +165,21 @@ public class Updater {
             clients.put(url, client);
         }
         return clients;
+    }
+
+    private static class UpdateInfo {
+        ObjectName objectName;
+        String filterAttributeName;
+        Object discoveredFilterAttributeValue;
+        Object currentUpdateAttributeValue;
+
+        public String updateObjectId() {
+            if (filterAttributeName == null) {
+                return String.format("%s", objectName);
+            } else {
+                return String.format("%s (%s=%s)", objectName, filterAttributeName, discoveredFilterAttributeValue);
+            }
+        }
     }
 
 }
