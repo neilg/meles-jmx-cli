@@ -51,15 +51,6 @@ public class Client {
         this.serviceUrl = serviceUrl;
     }
 
-    public <T> T execute(Command<T> command) throws IOException {
-        try {
-            return command.execute(connection());
-        } catch (IOException ioe) {
-            disconnect();
-            throw ioe;
-        }
-    }
-
     public void disconnect() throws IOException {
         if (connector != null) {
             try {

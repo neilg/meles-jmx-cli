@@ -20,8 +20,9 @@
 package com.melessoftware.utils.jmx;
 
 import javax.management.MBeanServerConnection;
+import java.io.IOException;
 
 public interface MBeanServerCallback<T> {
     
-    T execute(MBeanServerConnection connection);
+    T execute(MBeanServerConnection connection) throws IOException;
 }

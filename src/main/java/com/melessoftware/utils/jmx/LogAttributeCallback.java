@@ -33,19 +33,19 @@ import javax.management.ReflectionException;
 import java.io.IOException;
 import java.util.Set;
 
-public class LogAttributeCommand implements Command<Void> {
+public class LogAttributeCallback implements MBeanServerCallback<Void> {
 
-    public static final String LOG_PATTERN = "{} {} {}";
+    private static final String LOG_PATTERN = "{} {} {}";
 
     private ObjectName objectNamePattern;
     private String attributeName;
     private Logger logger;
 
-    public LogAttributeCommand(String objectNamePattern, String attributeName, String logger) throws MalformedObjectNameException {
+    public LogAttributeCallback(String objectNamePattern, String attributeName, String logger) throws MalformedObjectNameException {
         this(new ObjectName(objectNamePattern), attributeName, LoggerFactory.getLogger(logger));
     }
 
-    public LogAttributeCommand(ObjectName objectNamePattern, String attributeName, Logger logger) {
+    public LogAttributeCallback(ObjectName objectNamePattern, String attributeName, Logger logger) {
         this.objectNamePattern = objectNamePattern;
         this.attributeName = attributeName;
         this.logger = logger;

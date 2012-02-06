@@ -27,6 +27,7 @@ import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 import java.io.IOException;
+import java.net.MalformedURLException;
 
 public class ConnectionMaintainingJmxTemplate implements JmxTemplate {
 
@@ -41,12 +42,18 @@ public class ConnectionMaintainingJmxTemplate implements JmxTemplate {
         this.jmxUrl = jmxUrl;
     }
 
+    public ConnectionMaintainingJmxTemplate(String jmxUrl) throws MalformedURLException {
+        this(new JMXServiceURL(jmxUrl));
+    }
+
     @Override
     public <T> T runWithConnection(MBeanServerCallback<T> callback) throws IOException {
         MBeanServerConnection currentConnection = getConnection();
         T result = null;
         try {
             result = callback.execute(currentConnection);
+        } catch (IOException ioe) {
+            handleError(ioe);
         } catch (RuntimeException re) {
             handleError(re);
         } catch (Error e) {

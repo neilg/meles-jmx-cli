@@ -28,7 +28,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.management.MalformedObjectNameException;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
@@ -57,13 +56,12 @@ public class JmxLogger {
         final String objectName = options.valueOf(objectNameSpec);
         final String attributeName = options.valueOf(attributeNameSpec);
 
-        final Client client = createClient(url);
+        ConnectionMaintainingJmxTemplate template = new ConnectionMaintainingJmxTemplate(url);
+        closeTemplateOnShutdown(template);
 
-        closeClientOnShutdown(client);
-
-        final LogAttributeCommand command;
+        LogAttributeCallback callback;
         try {
-            command = new LogAttributeCommand(objectName, attributeName, "JmxLogger");
+            callback = new LogAttributeCallback(objectName, attributeName, "JmxLogger");
         } catch (MalformedObjectNameException mone) {
             String message = mone.getMessage();
             if (message == null) {
@@ -75,15 +73,15 @@ public class JmxLogger {
             return;
         }
 
-        Executors.newScheduledThreadPool(1).scheduleAtFixedRate(logAttributeTask(client, command), 0, 1000, TimeUnit.MILLISECONDS);
+        Executors.newScheduledThreadPool(1).scheduleAtFixedRate(logAttributeTask(template, callback), 0, 1000, TimeUnit.MILLISECONDS);
     }
 
-    private static Runnable logAttributeTask(final Client client, final LogAttributeCommand command) {
+    private static Runnable logAttributeTask(final JmxTemplate template, final MBeanServerCallback<?> callback) {
         return new Runnable() {
             @Override
             public void run() {
                 try {
-                    client.execute(command);
+                    template.runWithConnection(callback);
                 } catch (IOException ioe) {
                     LOG.debug("exception executing query", ioe);
                 }
@@ -91,13 +89,13 @@ public class JmxLogger {
         };
     }
 
-    private static void closeClientOnShutdown(final Client client) {
+    private static void closeTemplateOnShutdown(final ConnectionMaintainingJmxTemplate template) {
         Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override
             public void run() {
-                if (client != null) {
+                if (template != null) {
                     try {
-                        client.disconnect();
+                        template.close();
                     } catch (IOException ioe) {
                         // we're shutting down anyway. Don't worry about it
                         LOG.trace("exception disconnecting client", ioe);
@@ -107,20 +105,4 @@ public class JmxLogger {
         });
     }
 
-    private static Client createClient(String url) {
-        Client client;
-        try {
-            client = new Client(url);
-        } catch (MalformedURLException mue) {
-            String message = mue.getMessage();
-            if (message == null) {
-                System.err.printf("Invalid JMX URL: %s%n", url);
-            } else {
-                System.err.printf("Invalid JMX URL: %s, %s%n", url, message);
-            }
-            System.exit(EXIT_STATUS_INVALID_ARGS);
-            return null;
-        }
-        return client;
-    }
 }
