@@ -63,8 +63,8 @@ public class ConnectionMaintainingJmxTemplate implements JmxTemplate {
         try {
             cleanup();
         } catch (IOException ioe) {
-            // TODO what should we do with this?
-            // we should either 1) log the ioe and throw the parameter error, or 2) log the error and throw the ioe
+            log.error("IOException while handling {}. Stack trace logged at debug", error.getClass());
+            log.debug("IOException while handling error", ioe);
         }
         throw error;
     }
