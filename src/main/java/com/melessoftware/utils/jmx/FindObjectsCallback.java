@@ -20,9 +20,26 @@
 package com.melessoftware.utils.jmx;
 
 import javax.management.MBeanServerConnection;
+import javax.management.MalformedObjectNameException;
+import javax.management.ObjectInstance;
+import javax.management.ObjectName;
 import java.io.IOException;
+import java.util.Set;
 
-public interface MBeanServerCallback<T> {
+public class FindObjectsCallback implements MBeanServerCallback<Set<ObjectInstance>> {
 
-    T execute(MBeanServerConnection connection) throws IOException;
+    private ObjectName objectNamePattern;
+
+    public FindObjectsCallback(ObjectName objectNamePattern) {
+        this.objectNamePattern = objectNamePattern;
+    }
+
+    public FindObjectsCallback(String objectNamePattern) throws MalformedObjectNameException {
+        this(new ObjectName(objectNamePattern));
+    }
+
+    @Override
+    public Set<ObjectInstance> execute(MBeanServerConnection connection) throws IOException {
+        return connection.queryMBeans(objectNamePattern, null);
+    }
 }

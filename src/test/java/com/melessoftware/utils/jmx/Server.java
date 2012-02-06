@@ -19,10 +19,13 @@
 
 package com.melessoftware.utils.jmx;
 
-import javax.management.MBeanServerConnection;
-import java.io.IOException;
+import static java.lang.Thread.sleep;
 
-public interface MBeanServerCallback<T> {
+public class Server {
 
-    T execute(MBeanServerConnection connection) throws IOException;
+    public static void main(String[] args) throws InterruptedException {
+        while (true) {
+            sleep(10000);
+        }
+    }
 }
