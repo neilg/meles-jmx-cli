@@ -29,20 +29,20 @@ import javax.management.remote.JMXServiceURL;
 import java.io.IOException;
 import java.net.MalformedURLException;
 
-public class ConnectionMaintainingJmxTemplate implements JmxTemplate {
+public class PersistentJmxTemplate implements JmxTemplate {
 
-    private static final Logger log = LoggerFactory.getLogger(ConnectionMaintainingJmxTemplate.class);
+    private static final Logger log = LoggerFactory.getLogger(PersistentJmxTemplate.class);
 
     private JMXServiceURL jmxUrl;
 
     private JMXConnector connector;
     private MBeanServerConnection connection;
 
-    public ConnectionMaintainingJmxTemplate(JMXServiceURL jmxUrl) {
+    public PersistentJmxTemplate(JMXServiceURL jmxUrl) {
         this.jmxUrl = jmxUrl;
     }
 
-    public ConnectionMaintainingJmxTemplate(String jmxUrl) throws MalformedURLException {
+    public PersistentJmxTemplate(String jmxUrl) throws MalformedURLException {
         this(new JMXServiceURL(jmxUrl));
     }
 

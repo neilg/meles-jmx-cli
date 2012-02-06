@@ -56,7 +56,7 @@ public class JmxLogger {
         final String objectName = options.valueOf(objectNameSpec);
         final String attributeName = options.valueOf(attributeNameSpec);
 
-        ConnectionMaintainingJmxTemplate template = new ConnectionMaintainingJmxTemplate(url);
+        PersistentJmxTemplate template = new PersistentJmxTemplate(url);
         closeTemplateOnShutdown(template);
 
         LogAttributeCallback callback;
@@ -89,7 +89,7 @@ public class JmxLogger {
         };
     }
 
-    private static void closeTemplateOnShutdown(final ConnectionMaintainingJmxTemplate template) {
+    private static void closeTemplateOnShutdown(final PersistentJmxTemplate template) {
         Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override
             public void run() {
