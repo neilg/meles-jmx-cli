@@ -102,7 +102,7 @@ public class JmxLister {
     }
 
     public void list(String objectNamePattern, Appendable out) throws IOException, MalformedObjectNameException {
-        SimpleJmxTemplate template = new SimpleJmxTemplate(url);
+        ProxyJmxTemplate template = new ProxyJmxTemplate(url);
         FindObjectsCallback callback = new FindObjectsCallback(objectNamePattern);
         for (ObjectInstance objectInstance : template.runWithConnection(callback)) {
             System.out.println(objectInstance.getObjectName());
