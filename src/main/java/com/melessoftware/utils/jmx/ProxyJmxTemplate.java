@@ -42,107 +42,43 @@ import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 import java.io.IOException;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.Set;
 
 public class ProxyJmxTemplate implements JmxTemplate {
 
     private final JMXServiceURL jmxUrl;
     private ProxyMBeanServerConnection proxyMBeanServerConnection;
-//    private MBeanServerConnection proxyMBeanServerConnection;
+
+    private boolean isOpen = true;
+
+    private JMXConnector connector;
 
     public ProxyJmxTemplate(JMXServiceURL jmxUrl) {
         this.jmxUrl = jmxUrl;
         this.proxyMBeanServerConnection = new ProxyMBeanServerConnection();
-//        ConnectionHandler handler = new ConnectionHandler();
-//        Class<?> proxyClass = Proxy.getProxyClass(MBeanServerConnection.class.getClassLoader(), MBeanServerConnection.class);
-//        try {
-//            proxyMBeanServerConnection = (MBeanServerConnection) proxyClass.getConstructor(InvocationHandler.class).newInstance(handler);
-//        } catch (InstantiationException e) {
-//            throw new RuntimeException(e);
-//        } catch (IllegalAccessException e) {
-//            throw new RuntimeException(e);
-//        } catch (InvocationTargetException e) {
-//            throw new RuntimeException(e);
-//        } catch (NoSuchMethodException e) {
-//            throw new RuntimeException(e);
-//        }
+    }
+
+    public void close() throws IOException {
+        isOpen = false;
+        closeConnector();
+    }
+
+    private void closeConnector() throws IOException {
+        JMXConnector connector = this.connector;
+        this.connector = null;
+        connector.close();
     }
 
     @Override
     public <T> T runWithConnection(MBeanServerCallback<T> callback) throws IOException {
+        if(!isOpen) {
+            throw new RuntimeException("TODO");
+        }
         return callback.execute(proxyMBeanServerConnection);
-    }
-
-    private class ConnectionHandler implements InvocationHandler {
-
-        private JMXConnector connector;
-
-        private MBeanServerConnection getConnection() throws IOException {
-            if (connector == null) {
-                connector = JMXConnectorFactory.connect(jmxUrl);
-            }
-            try {
-                return connector.getMBeanServerConnection();
-            } catch (IOException ioe) {
-                closeConnector();
-                throw ioe;
-            }
-        }
-
-        private void closeConnector() throws IOException {
-            JMXConnector connector = this.connector;
-            this.connector = null;
-            connector.close();
-        }
-
-        @Override
-        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-            MBeanServerConnection connection = getConnection();
-            String methodName = method.getName();
-            Method underlyingMethod = findUnderlyingMethod(connection, method.getName(), args);
-            try {
-                return underlyingMethod.invoke(connection, args);
-            } catch (InvocationTargetException ite) {
-                Throwable targetException = ite.getTargetException();
-                if (targetException instanceof IOException) {
-                    closeConnector();
-                }
-                throw targetException;
-            }
-        }
-
-        private Method findUnderlyingMethod(MBeanServerConnection connection, String methodName, Object[] args) {
-            Class<?>[] argTypes;
-            if (args == null) {
-                argTypes = null;
-            } else {
-                argTypes = new Class[args.length];
-                for (int i = 0; i < args.length; i++) {
-                    Object arg = args[i];
-                    if (arg == null) {
-                        argTypes[i] = null;
-                    } else {
-                        argTypes[i] = arg.getClass();
-                    }
-                }
-            }
-            try {
-                return connection.getClass().getMethod(methodName, argTypes);
-            } catch (NoSuchMethodException nsme) {
-                for (Method method : connection.getClass().getMethods()) {
-                }
-            }
-            return null;  //To change body of created methods use File | Settings | File Templates.
-        }
     }
 
     private class ProxyMBeanServerConnection implements MBeanServerConnection {
 
-        private JMXConnector connector;
-
         private MBeanServerConnection getConnection() throws IOException {
             if (connector == null) {
                 connector = JMXConnectorFactory.connect(jmxUrl);
@@ -153,12 +89,6 @@ public class ProxyJmxTemplate implements JmxTemplate {
                 closeConnector();
                 throw ioe;
             }
-        }
-
-        private void closeConnector() throws IOException {
-            JMXConnector connector = this.connector;
-            this.connector = null;
-            connector.close();
         }
 
         private <T> T handleIOE(IOException ioe) throws IOException {
