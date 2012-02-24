@@ -137,7 +137,7 @@ public class ProxyJmxTemplate implements JmxTemplate {
             try {
                 getConnection().unregisterMBean(name);
             } catch (IOException ioe) {
-                handleIOE(ioe);
+                throw handleIOE(ioe);
             }
         }
 
@@ -209,7 +209,7 @@ public class ProxyJmxTemplate implements JmxTemplate {
             try {
                 getConnection().setAttribute(name, attribute);
             } catch (IOException ioe) {
-                handleIOE(ioe);
+                throw handleIOE(ioe);
             }
         }
 
