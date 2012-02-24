@@ -91,9 +91,9 @@ public class ProxyJmxTemplate implements JmxTemplate {
             }
         }
 
-        private <T> T handleIOE(IOException ioe) throws IOException {
+        private IOException handleIOE(IOException ioe) throws IOException {
             closeConnector();
-            throw ioe;
+            return ioe;
         }
 
         @Override
@@ -101,7 +101,7 @@ public class ProxyJmxTemplate implements JmxTemplate {
             try {
                 return getConnection().createMBean(className, name);
             } catch (IOException ioe) {
-                return handleIOE(ioe);
+                throw handleIOE(ioe);
             }
         }
 
@@ -110,7 +110,7 @@ public class ProxyJmxTemplate implements JmxTemplate {
             try {
                 return getConnection().createMBean(className, name, loaderName);
             } catch (IOException ioe) {
-                return handleIOE(ioe);
+                throw handleIOE(ioe);
             }
         }
 
@@ -119,7 +119,7 @@ public class ProxyJmxTemplate implements JmxTemplate {
             try {
                 return getConnection().createMBean(className, name, params, signature);
             } catch (IOException ioe) {
-                return handleIOE(ioe);
+                throw handleIOE(ioe);
             }
         }
 
@@ -128,7 +128,7 @@ public class ProxyJmxTemplate implements JmxTemplate {
             try {
                 return getConnection().createMBean(className, name, loaderName, params, signature);
             } catch (IOException ioe) {
-                return handleIOE(ioe);
+                throw handleIOE(ioe);
             }
         }
 
@@ -146,7 +146,7 @@ public class ProxyJmxTemplate implements JmxTemplate {
             try {
                 return getConnection().getObjectInstance(name);
             } catch (IOException ioe) {
-                return handleIOE(ioe);
+                throw handleIOE(ioe);
             }
         }
 
@@ -155,7 +155,7 @@ public class ProxyJmxTemplate implements JmxTemplate {
             try {
                 return getConnection().queryMBeans(name, query);
             } catch (IOException ioe) {
-                return handleIOE(ioe);
+                throw handleIOE(ioe);
             }
         }
 
@@ -164,7 +164,7 @@ public class ProxyJmxTemplate implements JmxTemplate {
             try {
                 return getConnection().queryNames(name, query);
             } catch (IOException ioe) {
-                return handleIOE(ioe);
+                throw handleIOE(ioe);
             }
         }
 
@@ -173,7 +173,7 @@ public class ProxyJmxTemplate implements JmxTemplate {
             try {
                 return getConnection().isRegistered(name);
             } catch (IOException ioe) {
-                return handleIOE(ioe);
+                throw handleIOE(ioe);
             }
         }
 
@@ -182,7 +182,7 @@ public class ProxyJmxTemplate implements JmxTemplate {
             try {
                 return getConnection().getMBeanCount();
             } catch (IOException ioe) {
-                return handleIOE(ioe);
+                throw handleIOE(ioe);
             }
         }
 
@@ -191,7 +191,7 @@ public class ProxyJmxTemplate implements JmxTemplate {
             try {
                 return getConnection().getAttribute(name, attribute);
             } catch (IOException ioe) {
-                return handleIOE(ioe);
+                throw handleIOE(ioe);
             }
         }
 
@@ -200,7 +200,7 @@ public class ProxyJmxTemplate implements JmxTemplate {
             try {
                 return getConnection().getAttributes(name, attributes);
             } catch (IOException ioe) {
-                return handleIOE(ioe);
+                throw handleIOE(ioe);
             }
         }
 
@@ -218,7 +218,7 @@ public class ProxyJmxTemplate implements JmxTemplate {
             try {
                 return getConnection().setAttributes(name, attributes);
             } catch (IOException ioe) {
-                return handleIOE(ioe);
+                throw handleIOE(ioe);
             }
         }
 
@@ -227,7 +227,7 @@ public class ProxyJmxTemplate implements JmxTemplate {
             try {
                 return getConnection().invoke(name, operationName, params, signature);
             } catch (IOException ioe) {
-                return handleIOE(ioe);
+                throw handleIOE(ioe);
             }
         }
 
@@ -236,7 +236,7 @@ public class ProxyJmxTemplate implements JmxTemplate {
             try {
                 return getConnection().getDefaultDomain();
             } catch (IOException ioe) {
-                return handleIOE(ioe);
+                throw handleIOE(ioe);
             }
         }
 
@@ -245,7 +245,7 @@ public class ProxyJmxTemplate implements JmxTemplate {
             try {
                 return getConnection().getDomains();
             } catch (IOException ioe) {
-                return handleIOE(ioe);
+                throw handleIOE(ioe);
             }
         }
 
@@ -284,7 +284,7 @@ public class ProxyJmxTemplate implements JmxTemplate {
             try {
                 return getConnection().getMBeanInfo(name);
             } catch (IOException ioe) {
-                return handleIOE(ioe);
+                throw handleIOE(ioe);
             }
         }
 
@@ -293,7 +293,7 @@ public class ProxyJmxTemplate implements JmxTemplate {
             try {
                 return getConnection().isInstanceOf(name, className);
             } catch (IOException ioe) {
-                return handleIOE(ioe);
+                throw handleIOE(ioe);
             }
         }
     }
