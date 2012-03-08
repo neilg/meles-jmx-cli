@@ -58,6 +58,7 @@ public class ProxyJmxTemplate implements JmxTemplate {
         this.proxyMBeanServerConnection = new ProxyMBeanServerConnection();
     }
 
+    @Override
     public void close() throws IOException {
         isOpen = false;
         closeConnector();

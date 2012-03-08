@@ -62,6 +62,7 @@ public class PersistentJmxTemplate implements JmxTemplate {
         return result;
     }
 
+    @Override
     public void close() throws IOException {
         cleanup();
     }

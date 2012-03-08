@@ -24,4 +24,6 @@ import java.io.IOException;
 public interface JmxTemplate {
 
     <T> T runWithConnection(MBeanServerCallback<T> callback) throws IOException;
+
+    void close() throws IOException;
 }

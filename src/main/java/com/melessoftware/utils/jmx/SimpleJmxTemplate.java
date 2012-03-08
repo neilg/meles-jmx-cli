@@ -48,4 +48,9 @@ public class SimpleJmxTemplate implements JmxTemplate {
             connector.close();
         }
     }
+
+    @Override
+    public void close() {
+        // don't need to do anything as we don't maintain resources
+    }
 }
