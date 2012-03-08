@@ -26,8 +26,13 @@
     </formats>
     <fileSets>
         <fileSet>
-            <directory>target/appassembler</directory>
-            <outputDirectory>/</outputDirectory>
+            <directory>target/appassembler/bin</directory>
+            <outputDirectory>/bin</outputDirectory>
+            <fileMode>755</fileMode>
+        </fileSet>
+        <fileSet>
+            <directory>target/appassembler/lib</directory>
+            <outputDirectory>/lib</outputDirectory>
         </fileSet>
     </fileSets>
 </assembly>
