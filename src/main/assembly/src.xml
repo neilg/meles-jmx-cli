@@ -27,7 +27,7 @@
     <fileSets>
         <fileSet>
             <directory>target/appassembler</directory>
-            <outputDirectory>.</outputDirectory>
+            <outputDirectory>/</outputDirectory>
         </fileSet>
     </fileSets>
 </assembly>
