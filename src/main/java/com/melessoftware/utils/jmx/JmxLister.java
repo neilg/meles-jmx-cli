@@ -25,7 +25,6 @@ import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 
 import javax.management.MalformedObjectNameException;
-import javax.management.ObjectInstance;
 import javax.management.remote.JMXServiceURL;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -40,6 +39,7 @@ public class JmxLister {
         OptionParser parser = new OptionParser();
         OptionSpec<String> urlSpec = parser.accepts("u", "JMX service url").withRequiredArg().required();
         OptionSpec<String> objectNameSpec = parser.accepts("n", "ObjectName pattern").withRequiredArg().defaultsTo("*:*");
+        OptionSpec<String> attributeNameSpec = parser.accepts("a", "attribute name").withOptionalArg();
 
         OptionSet options = null;
         try {
@@ -52,6 +52,7 @@ public class JmxLister {
 
         String url = options.valueOf(urlSpec);
         String objectNamePattern = options.valueOf(objectNameSpec);
+        String attributeName = options.valueOf(attributeNameSpec);
         JmxLister lister = null;
         try {
             lister = new JmxLister(url);
@@ -59,7 +60,7 @@ public class JmxLister {
             exitMalformedUrl(url, mue);
         }
         try {
-            lister.list(objectNamePattern, System.out);
+            lister.list(objectNamePattern, attributeName, System.out);
         } catch (MalformedURLException mue) {
             exitMalformedUrl(url, mue);
         } catch (IOException e) {
@@ -101,13 +102,10 @@ public class JmxLister {
         this.url = url;
     }
 
-    public void list(String objectNamePattern, Appendable out) throws IOException, MalformedObjectNameException {
+    public void list(String objectNamePattern, String attributeName, Appendable out) throws IOException, MalformedObjectNameException {
         JmxTemplate template = new SimpleJmxTemplate(url);
         try {
-            FindObjectsCallback callback = new FindObjectsCallback(objectNamePattern);
-            for (ObjectInstance objectInstance : template.runWithConnection(callback)) {
-                System.out.println(objectInstance.getObjectName());
-            }
+            template.runWithConnection(new ListObjectsCallback(objectNamePattern, attributeName, out));
         } finally {
             template.close();
         }

@@ -19,7 +19,11 @@
 
 package com.melessoftware.utils.jmx;
 
+import javax.management.AttributeNotFoundException;
+import javax.management.InstanceNotFoundException;
+import javax.management.MBeanException;
 import javax.management.MBeanServerConnection;
+import javax.management.ReflectionException;
 import java.io.IOException;
 
 public interface MBeanServerCallback<T> {
