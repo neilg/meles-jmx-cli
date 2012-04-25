@@ -43,6 +43,10 @@
                             <mainClass>com.melessoftware.utils.jmx.JmxLister</mainClass>
                             <name>list</name>
                         </program>
+                        <program>
+                            <mainClass>com.melessoftware.utils.jmx.JmxLogger</mainClass>
+                            <name>log</name>
+                        </program>
                     </programs>
                     <repositoryLayout>flat</repositoryLayout>
                     <repositoryName>lib</repositoryName>
