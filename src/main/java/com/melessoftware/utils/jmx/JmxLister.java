@@ -23,6 +23,8 @@ import joptsimple.OptionException;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.management.MalformedObjectNameException;
 import javax.management.remote.JMXServiceURL;
@@ -33,6 +35,8 @@ public class JmxLister {
 
     private static final int EXIT_STATUS_INVALID_ARGS = -1;
     private static final int EXIT_STATUS_COMMUNICATION = 1;
+
+    private static final Logger LOG = LoggerFactory.getLogger(JmxLister.class);
 
     public static void main(String[] args) throws IOException {
 
@@ -105,7 +109,7 @@ public class JmxLister {
     public void list(String objectNamePattern, String attributeName, Appendable out) throws IOException, MalformedObjectNameException {
         JmxTemplate template = new SimpleJmxTemplate(url);
         try {
-            template.runWithConnection(new ListObjectsCallback(objectNamePattern, attributeName, out));
+            template.runWithConnection(new ListObjectsCallback(objectNamePattern, attributeName, out, LOG));
         } finally {
             template.close();
         }
