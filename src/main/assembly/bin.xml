@@ -29,10 +29,13 @@
             <directory>target/appassembler/bin</directory>
             <outputDirectory>/bin</outputDirectory>
             <fileMode>755</fileMode>
+            <directoryMode>755</directoryMode>
         </fileSet>
         <fileSet>
             <directory>target/appassembler/lib</directory>
             <outputDirectory>/lib</outputDirectory>
+            <fileMode>644</fileMode>
+            <directoryMode>755</directoryMode>
         </fileSet>
     </fileSets>
 </assembly>
