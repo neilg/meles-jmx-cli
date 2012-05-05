@@ -42,8 +42,8 @@ public class JmxLister {
 
         OptionParser parser = new OptionParser();
         OptionSpec<String> urlSpec = parser.accepts("u", "JMX service url").withRequiredArg().required();
-        OptionSpec<String> objectNameSpec = parser.accepts("n", "ObjectName pattern").withRequiredArg().defaultsTo("*:*");
-        OptionSpec<String> attributeNameSpec = parser.accepts("a", "attribute name").withOptionalArg();
+        OptionSpec<String> objectNameSpec = parser.accepts("n", "find objects with names matching this pattern").withRequiredArg().defaultsTo("*:*");
+        OptionSpec<String> attributeNameSpec = parser.accepts("a", "show the value of this attribute").withRequiredArg();
 
         OptionSet options = null;
         try {

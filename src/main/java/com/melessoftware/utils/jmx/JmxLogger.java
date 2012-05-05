@@ -40,7 +40,7 @@ public class JmxLogger {
     public static void main(String[] args) throws IOException {
         OptionParser parser = new OptionParser();
         OptionSpec<String> urlSpec = parser.accepts("u", "JMX service url").withRequiredArg().required();
-        OptionSpec<String> objectNameSpec = parser.accepts("o", "find objects mathcing this pattern").withRequiredArg().required();
+        OptionSpec<String> objectNameSpec = parser.accepts("n", "find objects with names matching this pattern").withRequiredArg().required();
         OptionSpec<String> attributeNameSpec = parser.accepts("a", "show the value of this attribute").withRequiredArg().required();
 
         OptionSet options = null;
