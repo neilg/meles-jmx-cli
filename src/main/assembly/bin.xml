@@ -38,4 +38,10 @@
             <directoryMode>755</directoryMode>
         </fileSet>
     </fileSets>
+    <files>
+        <file>
+            <source>src/main/resources/META-INF/LICENSE</source>
+            <fileMode>644</fileMode>
+        </file>
+    </files>
 </assembly>
