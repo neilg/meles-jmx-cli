@@ -29,20 +29,25 @@
     <artifactId>meles-jmx-cli</artifactId>
     <version>0.7-SNAPSHOT</version>
 
+    <prerequisites>
+        <maven>3</maven>
+    </prerequisites>
+
     <build>
         <plugins>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>appassembler-maven-plugin</artifactId>
+                <version>1.8.1</version>
                 <configuration>
                     <programs>
                         <program>
+                            <id>list</id>
                             <mainClass>com.melessoftware.utils.jmx.JmxLister</mainClass>
-                            <name>list</name>
                         </program>
                         <program>
+                            <id>log</id>
                             <mainClass>com.melessoftware.utils.jmx.JmxLogger</mainClass>
-                            <name>log</name>
                         </program>
                     </programs>
                     <repositoryLayout>flat</repositoryLayout>
